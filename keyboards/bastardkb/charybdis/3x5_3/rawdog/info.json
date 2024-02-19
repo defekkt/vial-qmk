@@ -1,0 +1,23 @@
+{
+    "keyboard_name": "charybdis - trackdog",
+    "usb": {
+        "device_version": "0.0.1"
+    },
+    "rgb_matrix": {
+        "driver": "ws2812"
+    },
+    "matrix_pins": {
+        "cols": ["GP10", "GP11", "GP12", "GP13", "GP14"],
+        "rows": ["GP15", "GP16", "GP17", "GP18"]
+    },
+    "diode_direction": "ROW2COL",
+    "split": {
+        "soft_serial_pin": "GP4"
+    },
+    "ws2812": {
+        "pin": "GP21",
+        "driver": "vendor"
+    },
+    "processor": "RP2040",
+    "bootloader": "rp2040"
+}

@@ -25,6 +25,11 @@
 #    include "print.h"
 #endif // CONSOLE_ENABLE
 
+
+#ifdef POINTING_DEVICE_LATE_INIT
+#include "platforms/chibios/gpio.h"
+#endif
+
 #ifdef POINTING_DEVICE_ENABLE
 #    ifndef CHARYBDIS_MINIMUM_DEFAULT_DPI
 #        define CHARYBDIS_MINIMUM_DEFAULT_DPI 400
@@ -253,6 +258,30 @@ static void debug_charybdis_config_to_console(charybdis_config_t* config) {
 #    endif // CONSOLE_ENABLE
 }
 
+#ifdef POINTING_DEVICE_LATE_INIT
+bool pointing_late_init_done = false;
+bool pointing_device_toggle_onoff = true;
+
+static void point_device_toggle_power(){
+	if (!pointing_device_toggle_onoff){
+		// turn on power!
+		writePinHigh(POINTING_DEVICE_LATE_INIT_GPIO);
+		pointing_device_toggle_onoff = true;
+	} else {
+		writePinLow(POINTING_DEVICE_LATE_INIT_GPIO);
+		pointing_device_toggle_onoff = false;
+	}
+}
+
+static void point_device_startup(){
+	// turn on power!
+	writePinHigh(POINTING_DEVICE_LATE_INIT_GPIO);
+	
+	// init pointer device now:
+	pointing_device_init();
+}
+#endif
+
 bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
     if (!process_record_user(keycode, record)) {
         debug_charybdis_config_to_console(&g_charybdis_config);
@@ -261,13 +290,32 @@ bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
 #    ifdef POINTING_DEVICE_ENABLE
 #        ifndef NO_CHARYBDIS_KEYCODES
     switch (keycode) {
+		case POINTER_TOGGLE_POWER:
+#ifdef POINTING_DEVICE_LATE_INIT
+			if (record->event.pressed) {
+				point_device_toggle_power();
+			}
+#endif
+			break;
         case POINTER_DEFAULT_DPI_FORWARD:
+#ifdef POINTING_DEVICE_LATE_INIT
+			if (!pointing_late_init_done){
+				pointing_late_init_done=true;
+				point_device_startup();
+			}
+#endif
             if (record->event.pressed) {
                 // Step backward if shifted, forward otherwise.
                 charybdis_cycle_pointer_default_dpi(/* forward= */ !has_shift_mod());
             }
             break;
         case POINTER_DEFAULT_DPI_REVERSE:
+#ifdef POINTING_DEVICE_LATE_INIT
+			if (!pointing_late_init_done){
+				pointing_late_init_done=true;
+				point_device_startup();
+			}
+#endif
             if (record->event.pressed) {
                 // Step forward if shifted, backward otherwise.
                 charybdis_cycle_pointer_default_dpi(/* forward= */ has_shift_mod());

@@ -1,0 +1,3 @@
+# rawdog
+cheapo rp2040 board from aliexpress...
+

@@ -142,6 +142,14 @@ __attribute__((weak)) uint8_t pointing_device_handle_buttons(uint8_t buttons, bo
  * Initialises pointing device, perform driver init and optional keyboard/user level code.
  */
 __attribute__((weak)) void pointing_device_init(void) {
+#if defined(POINTING_DEVICE_LATE_INIT)
+    if ((!pointing_late_init_done)){
+		// do nothing, wait until this is set!
+		setPinOutput(POINTING_DEVICE_LATE_INIT_GPIO);
+		writePinLow(POINTING_DEVICE_LATE_INIT_GPIO);
+		return;
+	}
+#endif
 #if defined(SPLIT_POINTING_ENABLE)
     if ((POINTING_DEVICE_THIS_SIDE))
 #endif

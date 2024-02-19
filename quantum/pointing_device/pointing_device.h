@@ -74,6 +74,10 @@ uint16_t       pointing_device_driver_get_cpi(void);
 void           pointing_device_driver_set_cpi(uint16_t cpi);
 #endif
 
+#ifdef POINTING_DEVICE_LATE_INIT
+extern bool pointing_late_init_done;
+#endif
+
 typedef struct {
     void (*init)(void);
     report_mouse_t (*get_report)(report_mouse_t mouse_report);
